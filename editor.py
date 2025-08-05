@@ -66,5 +66,72 @@ def open_file():
         root.title(f"Text Editor - {file_path}")
         schedule_highlight()
         
+def save_file():
+    global currnet_file
+    if current_file:
+        with open(current_file, "w") as file:
+            content = text.get("1.0", "end-1c")
+            file.write(content)
+    else:
+        save_as_file()
 
+def save_as_file():
+    global current_file
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+    if file_path:
+        with open(file_path, "w") as file:
+            content = text.get("1.0", "end-1c")
+            file.write(content)
+        current_file = file_path
+        root.title(f"Text Editor - {file_path}")
 
+# Add Vim Motions
+current_mode = "normal"
+
+def enter_insert_mode(event=None):
+    global current_mode
+    current_mode = "insert"
+    text.config(insertwidth=2)
+    text.unbind("<Key>")
+
+def enter_normal_mode(event=None):
+    global current_mode
+    current_mode = "normal"
+    text.config(insertwidth=1)
+    text.bind("<Key>", normal_mode_key)
+
+text.bind("<Escape>", enter_normal_mode)
+
+def move_left():
+    current_pos = text.index(tk.INSERT)
+    line, col = map(int, current_pos.split("."))
+    if col > 0
+        new_pos = f"{line}.{col-1}"
+        text.mark_set(tk.INSERT, new_pos)
+        text.see(tk.INSERT)
+
+def move_right():
+    current_pos = text.index(tk.INSERT)
+    line, col = map(int, current_pos,split("."))
+    line_count = int(text.index("end-1c").split(".")[0])
+    if col < len(text.get(f"{line}.0", f"{line}.end")) - 1:
+        new_pos = f"{line}.{col+1}"
+        text.mark_set(tk.INSERT, new_pos)
+        text.see(tk.INSERT)
+    elif line < line_count:
+        new_pos = f"{line+1}.0"
+        text.mark_set(tk.INSERT, new_pos)
+        text.see(tk.INSERT)
+
+def move_up()
+    current_pos = text.index(tk.INSERT)
+    line, col = map(int, current_pos.split("."))
+    if line > 1:
+        prev_line = line - 1
+        prev_line_text = text.get(f"{prev_line}.0", f"{prev_line}.end")
+        if col < len(prev_line_text) - 1:
+            new_pos = f"{prev_line}.{col}"
+        else:
+            new_pos = f"{prev_line}.end-1c"
+        text.mark_set(tk.INSERT, new_pos)
+        text.see(tk.INSERT)
