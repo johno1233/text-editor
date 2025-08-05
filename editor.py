@@ -10,7 +10,7 @@ text = Text(root, wrap='word', undo=True)
 scrollbar = Scrollbar(root, command=text.yview)
 text.config(yscrollcommand=scrollbar.set)
 scrollbar.pack(side='right', fill='y')
-text.pack(side='left', fill='both', expand=true)
+text.pack(side='left', fill='both', expand=True)
 
 # Add syntax Highlighting
 text.tag_config("Token.Keyworkd", foreground="blue")
@@ -38,24 +38,14 @@ def schedule_highlight():
         root.after_cancel(highlight_timer)
     highlight_timer = root.after(500, highlight)
 
-text.bing("<KeyRelease>", lambda event: schedule_highlight())
+text.bind("<KeyRelease>", lambda event: schedule_highlight())
 
 # Implement File Operations
-menubar = Menu(root)
-root.config(menu=menubar)
-
-filemenu = Menu(menubar, tearoff=0)
-menubar.add_cascade(label="File", menu=filemenu)
-filemenu.add_command(label="Open", command=open_file)
-filemenu.add_command(label="Save", comand=save_file)
-filemenu.add_command(label="Save As", command=save_as_file)
-filemenu.add_seperator()
-filemenu.add_command(label="Exit", command=root.quit)
 
 current_file = None
 
 def open_file():
-    global currnet_file
+    global current_file
     file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
     if file_path:
         with open(file_path, "r") as file:
@@ -67,7 +57,7 @@ def open_file():
         schedule_highlight()
         
 def save_file():
-    global currnet_file
+    global current_file
     if current_file:
         with open(current_file, "w") as file:
             content = text.get("1.0", "end-1c")
@@ -84,6 +74,18 @@ def save_as_file():
             file.write(content)
         current_file = file_path
         root.title(f"Text Editor - {file_path}")
+
+menubar = Menu(root)
+root.config(menu=menubar)
+
+filemenu = Menu(menubar, tearoff=0)
+menubar.add_cascade(label="File", menu=filemenu)
+filemenu.add_command(label="Open", command=open_file)
+filemenu.add_command(label="Save", command=save_file)
+filemenu.add_command(label="Save As", command=save_as_file)
+filemenu.add_separator()
+filemenu.add_command(label="Exit", command=root.quit)
+
 
 # Add Vim Motions
 current_mode = "normal"
@@ -105,14 +107,14 @@ text.bind("<Escape>", enter_normal_mode)
 def move_left():
     current_pos = text.index(tk.INSERT)
     line, col = map(int, current_pos.split("."))
-    if col > 0
+    if col > 0:
         new_pos = f"{line}.{col-1}"
         text.mark_set(tk.INSERT, new_pos)
         text.see(tk.INSERT)
 
 def move_right():
     current_pos = text.index(tk.INSERT)
-    line, col = map(int, current_pos,split("."))
+    line, col = map(int, current_pos.split("."))
     line_count = int(text.index("end-1c").split(".")[0])
     if col < len(text.get(f"{line}.0", f"{line}.end")) - 1:
         new_pos = f"{line}.{col+1}"
@@ -123,7 +125,7 @@ def move_right():
         text.mark_set(tk.INSERT, new_pos)
         text.see(tk.INSERT)
 
-def move_up()
+def move_up():
     current_pos = text.index(tk.INSERT)
     line, col = map(int, current_pos.split("."))
     if line > 1:
@@ -135,3 +137,36 @@ def move_up()
             new_pos = f"{prev_line}.end-1c"
         text.mark_set(tk.INSERT, new_pos)
         text.see(tk.INSERT)
+
+def move_down():
+    current_pos = text.index(tk.INSERT)
+    line, col = map(int, current_pos.split("."))
+    line_count = int(text.index("end-1c").split(".")[0])
+    if line < line_count:
+        next_line = line + 1
+        next_line_text = text.get(f"{next_line}.0", f"{next_line}.end")
+        if col < len(next_line_text) - 1:
+            new_pos = f"{next_line}.{col}"
+        else:
+            new_pos = f"{next_line}.end-1c"
+        text.mark_set(tx.INSERT, new_pos)
+        text.see(tk.INSERT)
+
+def normal_mode_key(event):
+    key = event.keysym
+    if key == "h":
+        move_left()
+    elif key == "j":
+        move_down()
+    elif key == "k":
+        move_up()
+    elif key == "l":
+        move_right()
+    elif key == "i":
+        enter_insert_mode()
+    else:
+        return "break"
+
+enter_normal_mode()
+
+root.mainloop()
